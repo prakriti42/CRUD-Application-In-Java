@@ -1,6 +1,6 @@
 /**
  * PhoneBook Class
- * This class contains the solution for Qno 18 i.e an CRUD java application developed with MYSQL database.
+ * This class contains the code for an Interactive User Interface for a Phone Book.
  * @author:Parkrit_Regmi
  */
 
@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.*;
 
 public class PhoneBook extends JFrame {
 
@@ -18,17 +17,16 @@ public class PhoneBook extends JFrame {
     private JTextField firstName;
     private JTextField lastName;
     private JTextField phoneNumber;
-    private JCheckBox pvt;
+    private JCheckBox pvt;              
     private String contactInfo;
     private String contactNumber;
     private JPanel dataPanel;
     private DefaultTableModel table;
     private JTable records;
-    private JButton button1, button2, button3, button4;
-    Connection con;
+    private JButton button1,button2,button3,button4;
 
     //Constructor Method
-    public PhoneBook() {
+    public PhoneBook(){
         setVisible(true);                                           //makes the JFrame visible
 
         setTitle("Phone Book");                                     //sets the title of the JFrame
@@ -37,7 +35,7 @@ public class PhoneBook extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);         //enables the function of exit button
         setResizable(false);                                    //disables resizing of the frame
 
-        setLayout(new GridLayout(1, 2));         //Layout for the complete Frame
+        setLayout(new GridLayout(1,2));         //Layout for the complete Frame
 
         setJMenuBar(guiMenu());
 
@@ -47,86 +45,6 @@ public class PhoneBook extends JFrame {
         pack();                                             //sets the JComponents as per the size
 
         setLocationRelativeTo(null);                    //centers the JFrame
-
-        try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/phonebook", "root", "");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        fetch();
-
-    }
-    //method to add JFrame entries to the database
-    private void insertRecords(String foreName, String surName, String phoneNumber, String contactDetails) {
-        String mysqlQuery = "INSERT INTO PHONEBOOK_RECORDS (First_Name , Last_Name , Phone_Number , Phone_Details) VALUES (?,?,?,?)";
-
-        try {
-            PreparedStatement write = con.prepareStatement(mysqlQuery);
-            write.setString(1, foreName);
-            write.setString(2, surName);
-            write.setString(3, phoneNumber);
-            write.setString(4, contactDetails);
-            write.executeUpdate();
-            write.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    //method to display the database content to the JTable.
-    private void fetch() {
-        String mysqlQuery = "SELECT * FROM PHONEBOOK_RECORDS";
-        try {
-            PreparedStatement show = con.prepareStatement(mysqlQuery);
-            ResultSet display = show.executeQuery();
-
-            while(display.next()){
-                table.addRow(new Object[]{
-                        display.getString("First_Name"),
-                        display.getString("Last_Name"),
-                        display.getString("Phone_Number"),
-                        display.getString("Phone_Details"),
-                });
-            }
-            show.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    //method to update the database on the basis of the selected row.
-    private void updateRecord(String firstName , String lastName , String phoneNumber , String phoneDetails){
-
-        String mysqlQuery = "UPDATE PHONEBOOK_RECORDS SET FIRST_NAME = ? , LAST_NAME = ?,PHONE_NUMBER = ? , PHONE_DETAILS = ? WHERE PHONE_NUMBER = ? ";
-
-        try {
-            PreparedStatement update = con.prepareStatement(mysqlQuery);
-            update.setString(1,firstName);
-            update.setString(2,lastName);
-            update.setString(3,phoneNumber);
-            update.setString(4,phoneDetails);
-            update.setString(5,phoneNumber);
-            update.executeUpdate();
-            update.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    //method to delete the record from the database with the help of SN
-    private void deleteRecords(String phoneNumber){
-            String mysqlQuery = "DELETE FROM PHONEBOOK_RECORDS WHERE Phone_Number =?";
-            int row = records.getSelectedRow();
-        try {
-            PreparedStatement delete = con.prepareStatement(mysqlQuery);
-           // delete.setInt(1,SN);
-          //  delete.setInt(row);
-            delete.setString(1,phoneNumber);
-            delete.executeUpdate();
-            delete.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
     }
 
     private JMenuBar guiMenu(){
@@ -144,7 +62,7 @@ public class PhoneBook extends JFrame {
 
         editMenu.setMnemonic(KeyEvent.VK_E);            //Shortcut Key for File Menu (Alt+E)
         menuBar.add(editMenu);                                      //adds edit menu to the JMenuBar
-        editMenu.setToolTipText("Clear,Update,Add,Remove");         //displays tip on hover
+        editMenu.setToolTipText("Clear,Search,Add,Remove");         //displays tip on hover
 
         helpMenu.setMnemonic(KeyEvent.VK_H);        //Shortcut Key for File Menu (Alt+H)
         menuBar.add(helpMenu);                              //adds help menu to the JMenuBar
@@ -178,12 +96,12 @@ public class PhoneBook extends JFrame {
             }
         });
 
-        JMenuItem updateMenu = new JMenuItem("Update");
-        editMenu.add(updateMenu);
-        updateMenu.setMnemonic(KeyEvent.VK_S);
-        updateMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,KeyEvent.CTRL_DOWN_MASK));       //hotkey for searchMenu
+        JMenuItem searchMenu = new JMenuItem("Search");
+        editMenu.add(searchMenu);
+        searchMenu.setMnemonic(KeyEvent.VK_S);
+        searchMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,KeyEvent.CTRL_DOWN_MASK));       //hotkey for searchMenu
 
-        updateMenu.addActionListener(new ActionListener() {
+        searchMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 button2.doClick();          //performs operation of button2 that is labeled as "Search"
@@ -291,7 +209,7 @@ public class PhoneBook extends JFrame {
         JPanel panelC = new JPanel();
         panelC.setLayout(new GridLayout(2,2));  //Layout for the buttons section
         button1 =(new JButton("Clear"));
-        button2 =(new JButton("Update"));
+        button2 =(new JButton("Search"));
         button3 =(new JButton("Add"));
         button4 =(new JButton("Remove"));
 
@@ -317,28 +235,11 @@ public class PhoneBook extends JFrame {
             }
         });
 
-        //Event for the Update Button
+        //Event for the Search Button
         button2.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) { ////
-                int selectedRow = records.getSelectedRow();
-              //int sn = Integer.parseInt(table.getValueAt(selectedRow,0).toString());
-                String foreName = firstName.getText();
-                String surName = lastName.getText();
-                String contactNumber= phoneNumber.getText();
-                String phoneDetails ;
-                if (pvt.isSelected()){
-                    phoneDetails ="Private";
-                }
-                else {
-                   phoneDetails="Not Private";
-                }
-                System.out.println(phoneDetails);
-                updateRecord(  foreName , surName , contactNumber, phoneDetails);
-                System.out.println(phoneDetails);
-                button1.doClick();
-                table.setRowCount(0);
-                fetch();
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(container,"Search functionality will be supported in the professional version","Information",JOptionPane.PLAIN_MESSAGE);
             }
         });
 
@@ -346,8 +247,10 @@ public class PhoneBook extends JFrame {
         button3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
+
                 String foreName = firstName.getText();
-                String surName= lastName.getText();
+                String surname= lastName.getText();
                 contactNumber = phoneNumber.getText();
                 String contactInfo= "";
                 if (pvt.isSelected()){
@@ -356,10 +259,8 @@ public class PhoneBook extends JFrame {
                 else {
                     contactInfo="Not Private";
                 }
-                insertRecords(foreName,surName,contactNumber,contactInfo);
-                table.setRowCount(0);
-                fetch();
-               // button3.setToolTipText("Add entered data to the table");
+                table.addRow(new Object[]{foreName,surname,contactNumber,contactInfo});
+                button3.setToolTipText("Add entered data to the table");
                 button1.doClick();
         }
         });
@@ -368,24 +269,23 @@ public class PhoneBook extends JFrame {
         button4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String row = JOptionPane.showInputDialog(dataPanel,"Enter the row number of the records you want to delete.","Detail",JOptionPane.PLAIN_MESSAGE);
 
-                int selectedRow = records.getSelectedRow();
-                //String row = JOptionPane.showInputDialog(dataPanel,"Enter the SN of the entry you want to delete.","Detail",JOptionPane.PLAIN_MESSAGE);
-
-                int confirm = JOptionPane.showConfirmDialog(dataPanel,"Are you sure you want to delete the selected data?","Warning!!!",JOptionPane.INFORMATION_MESSAGE);
+                int confirm = JOptionPane.showConfirmDialog(dataPanel,"Are you sure you want to delete the selected row?","Warning!!!",JOptionPane.INFORMATION_MESSAGE);
 
                 //Exception Handling in case of row number input other than integer data type and missing row.
                 try {
                     if (confirm == JOptionPane.YES_OPTION) {
-                       // int selectedRow = Integer.parseInt(row);
-                        String phone = phoneNumber.getText();
-                        deleteRecords(phone);
-                        table.setRowCount(0);
-                        fetch();
+                        int selectedRow = Integer.parseInt(row);
+                        table.removeRow(selectedRow - 1);
                     }
                 }
                 catch(NumberFormatException ex){
-                    JOptionPane.showMessageDialog(dataPanel, "SN must be entered in number.", "Error", JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog(dataPanel, "The row must be entered in number.", "Error", JOptionPane.PLAIN_MESSAGE);
+                    }
+                catch(ArrayIndexOutOfBoundsException ex)
+                    {
+                        JOptionPane.showMessageDialog(dataPanel, "The row you entered doesn't exit.", "Error", JOptionPane.PLAIN_MESSAGE);
                     }
 
                 button1.doClick(); //clears the Input fields upon successful deletion of the records.
@@ -422,7 +322,6 @@ public class PhoneBook extends JFrame {
         table = new DefaultTableModel();
         table.setColumnIdentifiers(new String[] {"Fore Name","Sur Name","Phone Number","Phone Detail"});  //column names for the JTable records
         records= new JTable(table);
-
 
         dataPanel.add(records);
 
