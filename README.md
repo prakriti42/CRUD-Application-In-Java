@@ -1,5 +1,5 @@
 # PhoneBook
-A GUI application made with java.
+A simple GUI CRUD application made with java swing.
 
 ### UI
 
